@@ -5,28 +5,27 @@
  * Jon Bringhurst <jonb@lanl.gov> - 2011-11-15
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <getopt.h>
-
-#include <complib/cl_nodenamemap.h>
-#include <infiniband/ibnetdisc.h>
+#include "ib2slurm.h"
 
 void switch_iter_func(ibnd_node_t * node, void *iter_user_data)
 {
-    fprintf(stdout, "Found a switch!\n");
+    fprintf(stdout, "SwitchName=%s\n", node_name(node));
 }
 
 void ca_iter_func(ibnd_node_t * node, void *iter_user_data)
 {
-    fprintf(stdout, "Found a CA!\n");
+    fprintf(stdout, "Node=%s\n", node_name(node));
 }
 
-void router_iter_func(ibnd_node_t * node, void *iter_user_data)
-{
-    fprintf(stdout, "Found a router!\n");
-}
-
+char *node_name(ibnd_node_t * node)                                                                                         
+{                                                                                                                           
+    static char buf[256];                                                                                                   
+                                                                                                                            
+    sprintf(buf, "%016" PRIx64, node->guid);                                                                      
+                                                                                                                            
+    return buf;                                                                                                             
+}  
+  
 int main(int argc, char** argv)
 {
     struct ibnd_config config = {0};
@@ -62,7 +61,6 @@ int main(int argc, char** argv)
 
     ibnd_iter_nodes_type(fabric, switch_iter_func, IB_NODE_SWITCH, NULL);
     ibnd_iter_nodes_type(fabric, ca_iter_func, IB_NODE_CA, NULL);
-    ibnd_iter_nodes_type(fabric, router_iter_func, IB_NODE_ROUTER, NULL);
 
     ibnd_destroy_fabric(fabric);
     exit(EXIT_SUCCESS);
