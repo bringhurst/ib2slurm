@@ -1,7 +1,7 @@
 ib2slurm 0.1
 ============
 
-A script that attempts to generate a slurm style topology.conf(5) file using
+A program that attempts to generate a slurm style topology.conf(5) file using
 infiniband network discovery services.
 
 Usage
