@@ -14,4 +14,5 @@ ibnetdiscover(8) man page. The node name map entries must be compatible with
 slurm's currently used node naming scheme.
 
 If a node name map is not provided, ib2slurm will attempt to print the raw
-infiniband guid values instead.
+infiniband guid values instead. If this happens, the topology file will not
+be usable by slurm.
