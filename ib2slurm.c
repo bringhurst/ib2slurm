@@ -1,35 +1,38 @@
 #include "ib2slurm.h"
 
+nn_map_t *node_name_map = NULL;
+
 void switch_iter_func(ibnd_node_t * node, void *curry)
 {
-    ibnd_port_t *port;                                                                                                  
-    int p = 0;                                                                                                          
+    ibnd_port_t *port;
+    int p = 0;
 
-    fprintf(stdout, "SwitchName=%s Ports=", node_name(node)); 
+    char * switchname = node_name(node);
+    fprintf(stdout, "SwitchName=%s SubNodeNames=", switchname);
+    free(switchname);
 
-    for (p = 1; p <= node->numports; p++) {                                                                             
-        port = node->ports[p];                                                                                          
+    for (p = 1; p <= node->numports; p++) {
+        port = node->ports[p];
         if (port && port->remoteport) {
-            fprintf(f, "%016" PRIx64 ",", port->remoteport->guid);
+            char *remotename = node_name(port->remoteport);
+            fprintf(stdout, "%s,", remotename);
+            free(remotename);
         }
-    }             
+    }
 
     fprintf(stdout, "\n");
 }
 
-char *node_name(ibnd_node_t * node)                                                                                         
-{                                                                                                                           
-    static char buf[256];                                                                                                   
-    sprintf(buf, "%016" PRIx64, node->guid);                                                                      
-    return buf;                                                                                                             
-}  
-  
+char *node_name(ibnd_node_t * node)
+{
+    /* FIXME: does this always output something sane? */
+    return remap_node_name(node_name_map, node->guid, node->nodedesc);
+}
+
 int main(int argc, char** argv)
 {
     struct ibnd_config config = {0};
     ibnd_fabric_t *fabric = NULL;
-
-    nn_map_t *node_name_map = NULL;
     char *node_name_map_file = NULL;
 
     char *ibd_ca = NULL;
@@ -60,6 +63,8 @@ int main(int argc, char** argv)
     ibnd_iter_nodes_type(fabric, switch_iter_func, IB_NODE_SWITCH, NULL);
 
     ibnd_destroy_fabric(fabric);
+    close_node_name_map(node_name_map);
+
     exit(EXIT_SUCCESS);
 }
 
