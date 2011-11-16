@@ -15,10 +15,11 @@ void switch_iter_func(ibnd_node_t* node, void* curry)
 
     fprintf(stdout, " Switches=");
     for(p = 1; p <= node->numports; p++) {
-        if(node->type == IB_NODE_SWITCH) {
-            port = node->ports[p];
+        port = node->ports[p];
 
-            if(port && port->remoteport) {
+        if(port && port->remoteport) {
+            if(port->remoteport->node->type == IB_NODE_SWITCH) {
+
                 fprintf(stdout, "%" PRIx64 ", ", port->remoteport->guid);
 
 //                char* remoteswitch = node_name(port->remoteport->node);
@@ -30,10 +31,10 @@ void switch_iter_func(ibnd_node_t* node, void* curry)
 
     fprintf(stdout, " Nodes=");
     for(p = 1; p <= node->numports; p++) {
-        if(node->type == IB_NODE_CA) {
-            port = node->ports[p];
+        port = node->ports[p];
 
-            if(port && port->remoteport) {
+        if(port && port->remoteport) {
+            if(port->remoteport->node->type == IB_NODE_CA) {
                 char* remotenode = node_name(port->remoteport->node);
                 fprintf(stdout, "%s,", remotenode);
                 free(remotenode);
