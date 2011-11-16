@@ -81,8 +81,7 @@ void output_nodelist(char *tag, int type, ib2slurm_opts_t* opts, ibnd_node_t* no
     }
 
     if(opts->compress_flag) {
-        /* TODO */
-        //print_with_compression(&list_head, tag);
+        print_with_compression(&list_head, tag);
     } else {
         print_without_compression(&list_head, tag);
     }
@@ -90,6 +89,19 @@ void output_nodelist(char *tag, int type, ib2slurm_opts_t* opts, ibnd_node_t* no
     /* TODO: free the list elements. */
 }
 
+/*
+ * This attempts to print the list in a compressed format,
+ * such as common[min-max].
+ */
+void print_with_compression(ib2slurm_list_t* list, char* tag)
+{
+    fprintf(stderr, "Sorry, compressing strings isn't implemented yet.\n");
+    exit(EXIT_FAILURE);
+}
+
+/*
+ * This prints the list to be formatted as seperated by commas.
+ */
 void print_without_compression(ib2slurm_list_t* list, char* tag)
 {
     ib2slurm_list_t* list_cur = NULL;
