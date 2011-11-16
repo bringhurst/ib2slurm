@@ -1,36 +1,38 @@
 #include "ib2slurm.h"
 
-nn_map_t *node_name_map = NULL;
+nn_map_t* node_name_map = NULL;
 
-void switch_iter_func(ibnd_node_t * node, void *curry)
+void switch_iter_func(ibnd_node_t* node, void* curry)
 {
-    ibnd_port_t *port;
+    ibnd_port_t* port;
     int p = 0;
 
-    char * switchname = node_name(node);
+    char* switchname = node_name(node);
     fprintf(stdout, "SwitchName=%s", switchname);
     free(switchname);
 
-    for (p = 1; p <= node->numports; p++) {
+    for(p = 1; p <= node->numports; p++) {
         fprintf(stdout, " Switches=");
 
         if(node->type == IB_NODE_SWITCH) {
             port = node->ports[p];
-            if (port && port->remoteport) {
-                char *remoteswitch = node_name(port->remoteport);
+
+            if(port && port->remoteport) {
+                char* remoteswitch = node_name(port->remoteport);
                 fprintf(stdout, "%s,", remoteswitch);
                 free(remoteswitch);
             }
         }
     }
 
-    for (p = 1; p <= node->numports; p++) {
+    for(p = 1; p <= node->numports; p++) {
         fprintf(stdout, " Nodes=");
 
         if(node->type == IB_NODE_CA) {
             port = node->ports[p];
-            if (port && port->remoteport) {
-                char *remotenode = node_name(port->remoteport);
+
+            if(port && port->remoteport) {
+                char* remotenode = node_name(port->remoteport);
                 fprintf(stdout, "%s,", remotenode);
                 free(remotenode);
             }
@@ -40,7 +42,7 @@ void switch_iter_func(ibnd_node_t * node, void *curry)
     fprintf(stdout, "\n");
 }
 
-char *node_name(ibnd_node_t * node)
+char* node_name(ibnd_node_t* node)
 {
     /* FIXME: does this always output something sane? */
     return remap_node_name(node_name_map, node->guid, node->nodedesc);
@@ -49,10 +51,10 @@ char *node_name(ibnd_node_t * node)
 int main(int argc, char** argv)
 {
     struct ibnd_config config = {0};
-    ibnd_fabric_t *fabric = NULL;
-    char *node_name_map_file = NULL;
+    ibnd_fabric_t* fabric = NULL;
+    char* node_name_map_file = NULL;
 
-    char *ibd_ca = NULL;
+    char* ibd_ca = NULL;
     int ibd_ca_port = 0;
 
     int option_index = 0;
@@ -72,7 +74,7 @@ int main(int argc, char** argv)
 
     node_name_map = open_node_name_map(node_name_map_file);
 
-    if ((fabric = ibnd_discover_fabric(ibd_ca, ibd_ca_port, NULL, &config)) == NULL) {
+    if((fabric = ibnd_discover_fabric(ibd_ca, ibd_ca_port, NULL, &config)) == NULL) {
         fprintf(stderr, "IB discover failed.\n");
         exit(EXIT_FAILURE);
     }
