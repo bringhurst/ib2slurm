@@ -1,10 +1,3 @@
-/*
- * An experiment to see if we can generate a slurm style topology.conf file
- * from ib network discovery.
- *
- * Jon Bringhurst <jonb@lanl.gov> - 2011-11-15
- */
-
 #include "ib2slurm.h"
 
 void switch_iter_func(ibnd_node_t * node, void *curry)
