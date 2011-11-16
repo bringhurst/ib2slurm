@@ -10,4 +10,5 @@ Usage
 ```ib2slurm --node-name-map <name_map>```
 
 _name_map_ is the location of a node name map file formatted as described in the
-ibnetdiscover(8) man page.
+ibnetdiscover(8) man page. The node name map entries must be compatible with
+slurm's currently used node naming scheme.
