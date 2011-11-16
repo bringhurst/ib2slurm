@@ -11,28 +11,26 @@ void switch_iter_func(ibnd_node_t* node, void* curry)
     fprintf(stdout, "SwitchName=%s", switchname);
     free(switchname);
 
+    fprintf(stdout, " Switches=");
     for(p = 1; p <= node->numports; p++) {
-        fprintf(stdout, " Switches=");
-
         if(node->type == IB_NODE_SWITCH) {
             port = node->ports[p];
 
             if(port && port->remoteport) {
-                char* remoteswitch = node_name(port->remoteport);
+                char* remoteswitch = node_name(port->remoteport->node);
                 fprintf(stdout, "%s,", remoteswitch);
                 free(remoteswitch);
             }
         }
     }
 
+    fprintf(stdout, " Nodes=");
     for(p = 1; p <= node->numports; p++) {
-        fprintf(stdout, " Nodes=");
-
         if(node->type == IB_NODE_CA) {
             port = node->ports[p];
 
             if(port && port->remoteport) {
-                char* remotenode = node_name(port->remoteport);
+                char* remotenode = node_name(port->remoteport->node);
                 fprintf(stdout, "%s,", remotenode);
                 free(remotenode);
             }
@@ -44,8 +42,16 @@ void switch_iter_func(ibnd_node_t* node, void* curry)
 
 char* node_name(ibnd_node_t* node)
 {
-    /* FIXME: does this always output something sane? */
-    return remap_node_name(node_name_map, node->guid, node->nodedesc);
+    char* buf = NULL;
+
+    if(node == NULL) {
+        fprintf(stderr, "Attempted to get a node name from an invalid node.");
+        exit(EXIT_FAILURE);
+    }
+
+    buf = remap_node_name(node_name_map, node->guid, node->nodedesc);
+
+    return buf;
 }
 
 int main(int argc, char** argv)
