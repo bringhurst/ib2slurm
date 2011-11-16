@@ -80,10 +80,24 @@ void output_nodelist(char *tag, int type, ib2slurm_opts_t* opts, ibnd_node_t* no
         }
     }
 
-    if(list_head.str != NULL) {
+    if(opts->compress_flag) {
+        /* TODO */
+        //print_with_compression(&list_head, tag);
+    } else {
+        print_without_compression(&list_head, tag);
+    }
+
+    /* TODO: free the list elements. */
+}
+
+void print_without_compression(ib2slurm_list_t* list, char* tag)
+{
+    ib2slurm_list_t* list_cur = NULL;
+
+    if(list != NULL && list->str != NULL) {
         fprintf(stdout, " %s", tag);
 
-        for(list_cur = &list_head; list_cur->next != NULL; list_cur = list_cur->next) {
+        for(list_cur = list; list_cur->next != NULL; list_cur = list_cur->next) {
             fprintf(stdout, "%s", list_cur->str);
 
             if(list_cur->next->str != NULL) {
@@ -91,8 +105,6 @@ void output_nodelist(char *tag, int type, ib2slurm_opts_t* opts, ibnd_node_t* no
             }
         }
     }
-
-    /* TODO: free the list elements. */
 }
 
 /*

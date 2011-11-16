@@ -22,6 +22,8 @@ typedef struct ib2slurm_list_t {
 
 void switch_iter_func(ibnd_node_t* node, void* user_data);
 void output_nodelist(char *tag, int type, ib2slurm_opts_t* opts, ibnd_node_t* node);
+void print_without_compression(ib2slurm_list_t* list, char* tag);
+//void print_with_compression(ib2slurm_list_t* list, char* tag);
 char* node_name(ibnd_node_t* node, ib2slurm_opts_t* opts);
 
 #endif /* __IB2SLURM_H */
