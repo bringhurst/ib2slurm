@@ -8,15 +8,32 @@ void switch_iter_func(ibnd_node_t * node, void *curry)
     int p = 0;
 
     char * switchname = node_name(node);
-    fprintf(stdout, "SwitchName=%s SubNodeNames=", switchname);
+    fprintf(stdout, "SwitchName=%s", switchname);
     free(switchname);
 
     for (p = 1; p <= node->numports; p++) {
-        port = node->ports[p];
-        if (port && port->remoteport) {
-            char *remotename = node_name(port->remoteport);
-            fprintf(stdout, "%s,", remotename);
-            free(remotename);
+        fprintf(stdout, " Switches=");
+
+        if(node->type == IB_NODE_SWITCH) {
+            port = node->ports[p];
+            if (port && port->remoteport) {
+                char *remotename = node_name(port->remoteport);
+                fprintf(stdout, "%s,", remotename);
+                free(remotename);
+            }
+        }
+    }
+
+    for (p = 1; p <= node->numports; p++) {
+        fprintf(stdout, " Nodes=");
+
+        if(node->type == IB_NODE_CA) {
+            port = node->ports[p];
+            if (port && port->remoteport) {
+                char *remotename = node_name(port->remoteport);
+                fprintf(stdout, "%s,", remotename);
+                free(remotename);
+            }
         }
     }
 
