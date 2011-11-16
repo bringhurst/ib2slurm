@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <getopt.h>
 
 #include <complib/cl_nodenamemap.h>

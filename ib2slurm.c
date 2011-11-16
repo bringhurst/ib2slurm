@@ -7,22 +7,27 @@
 
 #include "ib2slurm.h"
 
-void switch_iter_func(ibnd_node_t * node, void *iter_user_data)
+void switch_iter_func(ibnd_node_t * node, void *curry)
 {
-    fprintf(stdout, "SwitchName=%s\n", node_name(node));
-}
+    ibnd_port_t *port;                                                                                                  
+    int p = 0;                                                                                                          
 
-void ca_iter_func(ibnd_node_t * node, void *iter_user_data)
-{
-    fprintf(stdout, "Node=%s\n", node_name(node));
+    fprintf(stdout, "SwitchName=%s Ports=", node_name(node)); 
+
+    for (p = 1; p <= node->numports; p++) {                                                                             
+        port = node->ports[p];                                                                                          
+        if (port && port->remoteport) {
+            fprintf(f, "%016" PRIx64 ",", port->remoteport->guid);
+        }
+    }             
+
+    fprintf(stdout, "\n");
 }
 
 char *node_name(ibnd_node_t * node)                                                                                         
 {                                                                                                                           
     static char buf[256];                                                                                                   
-                                                                                                                            
     sprintf(buf, "%016" PRIx64, node->guid);                                                                      
-                                                                                                                            
     return buf;                                                                                                             
 }  
   
@@ -60,7 +65,6 @@ int main(int argc, char** argv)
     }
 
     ibnd_iter_nodes_type(fabric, switch_iter_func, IB_NODE_SWITCH, NULL);
-    ibnd_iter_nodes_type(fabric, ca_iter_func, IB_NODE_CA, NULL);
 
     ibnd_destroy_fabric(fabric);
     exit(EXIT_SUCCESS);
