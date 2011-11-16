@@ -2,8 +2,6 @@
 
 void switch_iter_func(ibnd_node_t* node, void* user_data)
 {
-    ibnd_port_t* port;
-    int p = 0;
     ib2slurm_opts_t* opts = (ib2slurm_opts_t*)user_data;
 
     if(opts->lookup_flag) {
@@ -14,13 +12,24 @@ void switch_iter_func(ibnd_node_t* node, void* user_data)
         fprintf(stdout, "SwitchName=%" PRIx64, node->guid);
     }
 
-    fprintf(stdout, " Switches=");
+    output_nodelist("Switches=", IB_NODE_SWITCH, opts, node);
+    output_nodelist("Nodes=", IB_NODE_CA, opts, node);
+
+    fprintf(stdout, "\n");
+}
+
+void output_nodelist(char *tag, int type, ib2slurm_opts_t* opts, ibnd_node_t* node)
+{
+    ibnd_port_t* port;
+    int p = 0;
+
+    fprintf(stdout, " %s", tag);
     for(p = 1; p <= node->numports; p++) {
         port = node->ports[p];
 
         if(port && port->remoteport) {
-            if(port->remoteport->node->type == IB_NODE_SWITCH) {
-                if(opts->lookup_flag) {
+            if(port->remoteport->node->type == type) {
+                if(opts->lookup_flag || type == IB_NODE_CA) {
                     char* remoteswitch = node_name(port->remoteport->node, opts);
                     fprintf(stdout, "%s,", remoteswitch);
                     free(remoteswitch);
@@ -30,21 +39,6 @@ void switch_iter_func(ibnd_node_t* node, void* user_data)
             }
         }
     }
-
-    fprintf(stdout, " Nodes=");
-    for(p = 1; p <= node->numports; p++) {
-        port = node->ports[p];
-
-        if(port && port->remoteport) {
-            if(port->remoteport->node->type == IB_NODE_CA) {
-                char* remotenode = node_name(port->remoteport->node, opts);
-                fprintf(stdout, "%s,", remotenode);
-                free(remotenode);
-            }
-        }
-    }
-
-    fprintf(stdout, "\n");
 }
 
 char* node_name(ibnd_node_t* node, ib2slurm_opts_t* opts)
