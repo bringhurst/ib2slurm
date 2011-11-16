@@ -37,7 +37,11 @@ void output_nodelist(char *tag, int type, ib2slurm_opts_t* opts, ibnd_node_t* no
     ibnd_port_t* port;
     int p = 0;
 
-    fprintf(stdout, " %s", tag);
+    ib2slurm_list_t list_head;
+    list_head.str = NULL;
+    list_head.next = NULL;
+
+    ib2slurm_list_t* list_cur = &list_head;
 
     /*
      * Lets go through all the ports on this switch to see if anything is
@@ -46,25 +50,49 @@ void output_nodelist(char *tag, int type, ib2slurm_opts_t* opts, ibnd_node_t* no
     for(p = 1; p <= node->numports; p++) {
         port = node->ports[p];
 
-        if(port && port->remoteport) {
+        /*
+         * Only print out the node types that match the tag printed
+         * before it.
+         */
+        if(port && port->remoteport && port->remoteport->node->type == type) {
 
-            /*
-             * Only print out the node types that match the tag printed
-             * before it.
-             */
-            if(port->remoteport->node->type == type) {
+            /* Always attempt a node lookup, since slurm requires it. */
+            if(opts->lookup_flag || type == IB_NODE_CA) {
+                char* remote = node_name(port->remoteport->node, opts);
 
-                /* Always attempt a node lookup, since slurm requires it. */
-                if(opts->lookup_flag || type == IB_NODE_CA) {
-                    char* remoteswitch = node_name(port->remoteport->node, opts);
-                    fprintf(stdout, "%s,", remoteswitch);
-                    free(remoteswitch);
-                } else {
-                    fprintf(stdout, "%" PRIx64 ", ", port->remoteport->guid);
-                }
+                list_cur->str = remote;
+                list_cur->next = (ib2slurm_list_t*)malloc(sizeof(ib2slurm_list_t));
+
+                list_cur = list_cur->next;
+                list_cur->str = NULL;
+                list_cur->next = NULL;
+            } else {
+                char* buf = (char*)malloc(sizeof(char) * 512);
+                sprintf(buf, "%" PRIx64, port->remoteport->guid);
+
+                list_cur->str = buf;
+                list_cur->next = (ib2slurm_list_t*)malloc(sizeof(ib2slurm_list_t));
+
+                list_cur = list_cur->next;
+                list_cur->str = NULL;
+                list_cur->next = NULL;
             }
         }
     }
+
+    if(list_head.str != NULL) {
+        fprintf(stdout, " %s", tag);
+
+        for(list_cur = &list_head; list_cur->next != NULL; list_cur = list_cur->next) {
+            fprintf(stdout, "%s", list_cur->str);
+
+            if(list_cur->next->str != NULL) {
+                fprintf(stdout, ", ");
+            }
+        }
+    }
+
+    /* TODO: free the list elements. */
 }
 
 /*
@@ -105,7 +133,6 @@ void output_header()
 int main(int argc, char** argv)
 {
     ibnd_fabric_t* fabric = NULL;
-    struct ibnd_config config = {0};
     char* ibd_ca = NULL;
     int ibd_ca_port = 0;
 
@@ -132,7 +159,7 @@ int main(int argc, char** argv)
 
     opts.node_name_map = open_node_name_map(node_name_map_file);
 
-    if((fabric = ibnd_discover_fabric(ibd_ca, ibd_ca_port, NULL, &config)) == NULL) {
+    if((fabric = ibnd_discover_fabric(ibd_ca, ibd_ca_port, NULL, 0)) == NULL) {
         fprintf(stderr, "IB discover failed.\n");
         exit(EXIT_FAILURE);
     }

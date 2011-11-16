@@ -15,6 +15,11 @@ typedef struct ib2slurm_opts_t {
     int compress_flag;
 } ib2slurm_opts_t;
 
+typedef struct ib2slurm_list_t {
+   char* str;
+   struct ib2slurm_list_t* next;
+} ib2slurm_list_t;
+
 void switch_iter_func(ibnd_node_t* node, void* user_data);
 void output_nodelist(char *tag, int type, ib2slurm_opts_t* opts, ibnd_node_t* node);
 char* node_name(ibnd_node_t* node, ib2slurm_opts_t* opts);
