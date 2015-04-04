@@ -60,6 +60,11 @@ void output_nodelist(char *tag, int type, ib2slurm_opts_t* opts, ibnd_node_t* no
             if(opts->lookup_flag || type == IB_NODE_CA) {
                 char* remote = node_name(port->remoteport->node, opts);
 
+		char *marker = strstr(remote," HCA-");
+		if (marker) {
+		   *marker = '\0';
+		}
+
                 list_cur->str = remote;
                 list_cur->next = (ib2slurm_list_t*)malloc(sizeof(ib2slurm_list_t));
 
@@ -183,7 +188,8 @@ int main(int argc, char** argv)
 
     opts.node_name_map = open_node_name_map(node_name_map_file);
 
-    if((fabric = ibnd_discover_fabric(ibd_ca, ibd_ca_port, NULL, 0)) == NULL) {
+    struct ibnd_config config = { 0 };
+    if((fabric = ibnd_discover_fabric(ibd_ca, ibd_ca_port, NULL, &config)) == NULL) {
         fprintf(stderr, "IB discover failed.\n");
         exit(EXIT_FAILURE);
     }
